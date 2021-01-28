@@ -1,8 +1,5 @@
 import numpy as np
 
-# Press Maj+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
 
 def frechet_distance(cloud1, cloud2):
     # Compute Frechet Distance between two curves
@@ -21,23 +18,21 @@ class DiscreteFrechet(object):
 
     def __init__(self):
         """
-        Initializes the instance with a pairwise distance function.
-        :param dist_func: The distance function. It must accept two NumPy
-        arrays containing the point coordinates (x, y), (lat, long)
+        Initializes the instance with an empty ca table.
         """
-        self.dist_func = DiscreteFrechet.euclidean
         self.ca = np.array([0.0])
 
-    def euclidean(p: np.ndarray, q: np.ndarray) -> float:
-        d = p - q
+    @staticmethod
+    def euclidean(point_1: np.ndarray, point_2: np.ndarray) -> float:
+        d = point_1 - point_2
         return np.linalg.norm(d)
 
-    def distance(self, p: np.ndarray, q: np.ndarray) -> float:
+    def distance(self, polyline_1: np.ndarray, polyline_2: np.ndarray) -> float:
         """
-        Calculates the Fréchet distance between poly-lines p and q
-        This function implements the algorithm described by Eiter & Mannila
-        :param p: Poly-line p
-        :param q: Poly-line q
+        Calculates the Fréchet distance between poly-lines 1 and 2
+        This function implements the algorithm described by Eiter & Manilla
+        :param polyline_1: Poly-line 1
+        :param polyline_2: Poly-line 2
         :return: Distance value
         """
 
@@ -51,7 +46,7 @@ class DiscreteFrechet(object):
             if self.ca[i, j] > -1.0:
                 return self.ca[i, j]
 
-            d = self.dist_func(p[i], q[j])
+            d = DiscreteFrechet.euclidean(polyline_1[i], polyline_2[j])
             if i == 0 and j == 0:
                 self.ca[i, j] = d
             elif i > 0 and j == 0:
@@ -59,22 +54,27 @@ class DiscreteFrechet(object):
             elif i == 0 and j > 0:
                 self.ca[i, j] = max(calculate(0, j - 1), d)
             elif i > 0 and j > 0:
-                self.ca[i, j] = max(min(calculate(i - 1, j),
-                                        calculate(i - 1, j - 1),
-                                        calculate(i, j - 1)), d)
+                self.ca[i, j] = max(
+                    min(
+                        calculate(i - 1, j),
+                        calculate(i - 1, j - 1),
+                        calculate(i, j - 1),
+                    ),
+                    d,
+                )
             else:
                 self.ca[i, j] = np.infty
             return self.ca[i, j]
 
-        n_p = p.shape[0]
-        n_q = q.shape[0]
+        n_p = polyline_1.shape[0]
+        n_q = polyline_2.shape[0]
         self.ca = np.zeros((n_p, n_q))
         self.ca.fill(-1.0)
         return calculate(n_p - 1, n_q - 1)
 
 
 # Press the green button in the gutter to run the script.
-if __name__ == '__main__':
+if __name__ == "__main__":
     np.set_printoptions(precision=4)
 
     p = np.array(
