@@ -73,7 +73,6 @@ class DiscreteFrechet(object):
         return calculate(n_p - 1, n_q - 1)
 
 
-# Press the green button in the gutter to run the script.
 if __name__ == "__main__":
     np.set_printoptions(precision=4)
 
