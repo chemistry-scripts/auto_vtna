@@ -1,4 +1,14 @@
+import argparse
+import logging
+import sys
+from pathlib import Path
 import numpy as np
+
+
+def main():
+    """Main function that does the job"""
+    setup_logging()
+    args = get_input_arguments()
 
 
 def frechet_distance(cloud1, cloud2):
@@ -73,32 +83,63 @@ class DiscreteFrechet(object):
         return calculate(n_p - 1, n_q - 1)
 
 
+def setup_logging():
+    """Setup logging for module"""
+    # Setup logging
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(logging.DEBUG)
+
+    formatter = logging.Formatter("%(asctime)s :: %(levelname)s :: %(message)s")
+    stream_handler.setFormatter(formatter)
+
+    logger.addHandler(stream_handler)
+
+
+def get_input_arguments():
+    """Check command line options and accordingly set computation parameters."""
+    logger = logging.getLogger()
+
+    # List of values to extract
+    values = dict.fromkeys(["input_files"])
+
+    # Basic parser setup
+    parser = argparse.ArgumentParser(
+        description=help_description(), epilog=help_epilog()
+    )
+    parser.formatter_class = argparse.RawDescriptionHelpFormatter
+
+    # Add arguments to parser
+    parser.add_argument(
+        "-i",
+        "--input_files",
+        type=str,
+        nargs="+",
+        help="List of files for which a single point is necessary",
+    )
+    try:
+        args = parser.parse_args()
+    except argparse.ArgumentError as error:
+        print(str(error))  # Print something like "option -a not recognized"
+        sys.exit(2)
+
+    # Setup file names
+    values["input_files"] = [Path(i) for i in args.input_files]
+    logger.debug("Input files: %s", values["input_files"])
+
+    # All values are retrieved, return the table
+    return values
+
+
+def help_description():
+    pass
+
+
+def help_epilog():
+    pass
+
+
 if __name__ == "__main__":
-    np.set_printoptions(precision=4)
-
-    p = np.array(
-        [
-            [0.2, 2.0],
-            [1.5, 2.8],
-            [2.3, 1.6],
-            [2.9, 1.8],
-            [4.1, 3.1],
-            [5.6, 2.9],
-            [7.2, 1.3],
-            [8.2, 1.1],
-        ]
-    )
-    q = np.array(
-        [
-            [0.3, 1.6],
-            [3.2, 3.0],
-            [3.8, 1.8],
-            [5.2, 3.1],
-            [6.5, 2.8],
-            [7.0, 0.8],
-            [8.9, 0.6],
-        ]
-    )
-
-    distance = frechet_distance(p, q)
-    print(distance)
+    main()
