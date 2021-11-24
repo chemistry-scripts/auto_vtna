@@ -1,5 +1,6 @@
 import argparse
 import logging
+import csv
 import sys
 from pathlib import Path
 import numpy as np
@@ -9,6 +10,12 @@ def main():
     """Main function that does the job"""
     setup_logging()
     args = get_input_arguments()
+    data = list()
+    for file in args["input_file"]:
+        with open(file) as csv_file:
+            csv.reader(csv_file)
+
+    # data is a list of ndarrays.
 
 
 def frechet_distance(cloud1, cloud2):
